@@ -13,6 +13,11 @@ public class Draggable : MonoBehaviour
 
     private Vector3 startingPos;
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        StartCoroutine(Ball.Instance.Respawn());    
+    }
+
     void OnMouseDown()
     {
         beingDragged = true;

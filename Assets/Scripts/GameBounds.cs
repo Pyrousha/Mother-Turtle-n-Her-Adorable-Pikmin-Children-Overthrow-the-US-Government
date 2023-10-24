@@ -7,6 +7,7 @@ public class GameBounds : MonoBehaviour
 {
     private void OnTriggerExit2D(Collider2D collision)
     {
-        SceneManager.LoadScene(0);
+        if(Ball.Instance != null)
+            StartCoroutine(Ball.Instance.Respawn());
     }
 }
