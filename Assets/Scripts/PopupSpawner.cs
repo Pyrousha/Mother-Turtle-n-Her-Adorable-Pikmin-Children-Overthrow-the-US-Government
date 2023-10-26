@@ -1,7 +1,7 @@
+using BeauRoutine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BeauRoutine;
 
 public class PopupSpawner : Singleton<PopupSpawner>
 {
@@ -17,13 +17,23 @@ public class PopupSpawner : Singleton<PopupSpawner>
     private List<Routine> speedupRoutines = new List<Routine>();
     private int numSpawned = 0;
 
-    // Start is called before the first frame update
-    void Start()
+    public bool SpawnPopups { get; set; } = false;
+
+    private void Start()
     {
-        currRoutine = Routine.Start(this, SpawnPopupsRoutine());
+        Ball.Instance.OnStartMove += OnStartMove;
     }
 
-    public void RestartRoutine()
+    private void OnStartMove()
+    {
+        if (SpawnPopups)
+        {
+            currRoutine.Stop();
+            currRoutine = Routine.Start(this, SpawnPopupsRoutine());
+        }
+    }
+
+    public void StopRoutine()
     {
         currRoutine.Stop();
 
@@ -31,8 +41,6 @@ public class PopupSpawner : Singleton<PopupSpawner>
             Destroy(obj);
 
         numSpawned = 0;
-
-        currRoutine = Routine.Start(this, SpawnPopupsRoutine());
     }
 
     public void RemoveFromList(GameObject obj)
@@ -40,9 +48,20 @@ public class PopupSpawner : Singleton<PopupSpawner>
         spawnedObjects.Remove(obj);
     }
 
+    public void SpawnPopup(GameObject _popupObj)
+    {
+        GameObject newPopup = Instantiate(_popupObj, popupParent);
+        newPopup.transform.localPosition = new Vector3(0, 0, -numSpawned / 100f);
+
+        newPopup.transform.GetChild(0).GetComponent<PopupX>().AfterSpawned();
+
+        numSpawned++;
+        spawnedObjects.Add(newPopup);
+    }
+
     private IEnumerator SpawnPopupsRoutine()
     {
-        while(true)
+        while (true)
         {
             float timeToWait = Random.Range(minRandSpawnTime, maxRandSpawnTime);
             yield return timeToWait;
@@ -50,7 +69,7 @@ public class PopupSpawner : Singleton<PopupSpawner>
             int randIndex = Random.Range(0, popupPrefabs.Length - 1);
 
             GameObject newPopup = Instantiate(popupPrefabs[randIndex], popupParent);
-            newPopup.transform.localPosition = new Vector3(0, 0, -numSpawned/100f);
+            newPopup.transform.localPosition = new Vector3(0, 0, -numSpawned / 100f);
 
             newPopup.transform.GetChild(0).GetComponent<PopupX>().AfterSpawned();
 
@@ -66,7 +85,7 @@ public class PopupSpawner : Singleton<PopupSpawner>
 
 
         speedupRoutines = new List<Routine>();
-        RestartRoutine();
+        StopRoutine();
 
         Time.timeScale = 1;
     }

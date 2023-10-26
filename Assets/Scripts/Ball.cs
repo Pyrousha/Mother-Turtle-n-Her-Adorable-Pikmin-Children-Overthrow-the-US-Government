@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Ball : Singleton<Ball>
@@ -17,9 +16,12 @@ public class Ball : Singleton<Ball>
         rb = GetComponent<Rigidbody2D>();
     }
 
+    public event System.Action OnRespawn;
+    public event System.Action OnStartMove;
+
     private void OnMouseDown()
     {
-        if(!moving)
+        if (!moving)
         {
             moving = true;
             rb.gravityScale = 1;
@@ -28,6 +30,7 @@ public class Ball : Singleton<Ball>
             respawning = false;
 
             clickText.SetActive(false);
+            OnStartMove?.Invoke();
         }
     }
 
@@ -35,6 +38,8 @@ public class Ball : Singleton<Ball>
     {
         if (respawning)
             yield break;
+
+        AudioManager.Instance.Play(AudioType.EXPLODE);
 
         respawning = true;
 
@@ -47,6 +52,8 @@ public class Ball : Singleton<Ball>
 
         rb.velocity = Vector2.zero;
         rb.gravityScale = 0;
+
+        OnRespawn?.Invoke();
 
         PopupSpawner.Instance.RemoveAllPopups();
 
