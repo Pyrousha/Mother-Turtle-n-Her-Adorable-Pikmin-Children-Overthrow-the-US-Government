@@ -48,6 +48,8 @@ public class Ball : Singleton<Ball>
         rb.velocity = Vector2.zero;
         rb.gravityScale = 0;
 
+        PopupSpawner.Instance.RemoveAllPopups();
+
         yield return new WaitForSeconds(0.25f);
         moving = false;
         clickText.SetActive(true);
